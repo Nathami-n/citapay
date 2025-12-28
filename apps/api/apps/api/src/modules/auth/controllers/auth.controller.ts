@@ -7,7 +7,7 @@ import {
     JwtAuthGuard,
     LocalAuthGuard,
     setAuthCookies
-} from "@api/modules";
+} from "@api/modules/auth";
 import {
     AppConfigService,
     COOKIE_NAMES
