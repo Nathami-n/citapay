@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { MerchantsController } from '@api/merchants/controllers';
-import { MerchantsService } from '@api/merchants/services';
+import { MerchantsController } from '@api/modules/merchants/controllers';
+import { MerchantsService } from '@api/modules/merchants/services';
 
 @Module({
   controllers: [MerchantsController],
