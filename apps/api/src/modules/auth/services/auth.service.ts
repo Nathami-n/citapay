@@ -2,7 +2,7 @@ import { AppConfigService, PrismaService } from "@app/common";
 import { AuthUserPayload } from "@app/common/types";
 import { ConflictException, Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { User, UserRole } from "@prisma/client";
+import { AuthProviderType, User, UserRole } from "@prisma/client";
 import { EmailSignupDto } from "@api/modules/auth/dto";
 import * as bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
@@ -51,8 +51,7 @@ export class AuthService {
     async login(user: any, deviceInfo: { ip?: string; userAgent?: string }) {
         const sessionId = uuidv4();
         const refreshToken = uuidv4();
-        const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + this.config.jwtRefreshExpirationDays);
+        const expiresAt = new Date(Date.now() + this.config.jwtRefreshExpirationMs);
 
         await this.prisma.session.create({
             data: {
@@ -85,8 +84,7 @@ export class AuthService {
         // Rotate tokens
         const newSessionId = uuidv4();
         const newRefreshToken = uuidv4();
-        const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + this.config.jwtRefreshExpirationDays);
+        const expiresAt = new Date(Date.now() + this.config.jwtRefreshExpirationMs);
 
         await this.prisma.$transaction([
             this.prisma.session.update({
@@ -129,7 +127,7 @@ export class AuthService {
         return {
             accessToken: this.jwtService.sign(payload, {
                 secret: this.config.jwtSecret,
-                expiresIn: this.config.jwtExpiration as string
+                expiresIn: this.config.jwtExpiration
             }),
             refreshToken,
         };
@@ -159,7 +157,7 @@ export class AuthService {
                     role: UserRole.USER,
                     authProviders: {
                         create: {
-                            type: "GOOGLE",
+                            type: AuthProviderType.GOOGLE,
                             providerId: id
                         }
                     }
@@ -167,11 +165,11 @@ export class AuthService {
                 include: { authProviders: true }
             });
         } else {
-            const hasGoogle = user.authProviders.find(p => p.type === "GOOGLE");
+            const hasGoogle = user.authProviders.find(p => p.type === AuthProviderType.GOOGLE);
             if (!hasGoogle) {
                 await this.prisma.authProvider.create({
                     data: {
-                        type: "GOOGLE",
+                        type: AuthProviderType.GOOGLE,
                         providerId: id,
                         userId: user.id
                     }

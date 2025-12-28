@@ -58,18 +58,22 @@ export class AppConfigService {
         return this.config.getOrThrow<string>("JWT_SECRET");
     }
 
-    get jwtExpiration(): string {
-        return this.config.get<string>("JWT_EXPIRATION", "1h");
+    get jwtExpiration(): number {
+        return this.config.get<number>("JWT_EXPIRATION", 3600); // 1 hour in seconds
     }
 
-    get jwtRefreshExpiration(): string {
-        return this.config.get<string>("JWT_REFRESH_EXPIRATION", "7d");
+    get jwtRefreshExpiration(): number {
+        return this.config.get<number>("JWT_REFRESH_EXPIRATION", 604800); // 7 days in seconds
     }
 
     get jwtRefreshExpirationDays(): number {
-        const expiration = this.jwtRefreshExpiration;
-        const match = expiration.match(/^(\d+)d$/);
-        return match ? parseInt(match[1], 10) : 7;
+        // Convert seconds to days
+        return Math.floor(this.jwtRefreshExpiration / 86400);
+    }
+
+    get jwtRefreshExpirationMs(): number {
+        // Convert seconds to milliseconds
+        return this.jwtRefreshExpiration * 1000;
     }
 
     // ============================================
@@ -182,6 +186,7 @@ export class AppConfigService {
             expiration: this.jwtExpiration,
             refreshExpiration: this.jwtRefreshExpiration,
             refreshExpirationDays: this.jwtRefreshExpirationDays,
+            refreshExpirationMs: this.jwtRefreshExpirationMs,
         };
     }
 

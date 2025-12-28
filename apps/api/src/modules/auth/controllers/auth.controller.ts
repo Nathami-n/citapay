@@ -10,7 +10,7 @@ import {
 } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from "@nestjs/swagger";
 import type { Request, Response } from "express";
-import { AppConfigService } from "@app/common";
+import { AppConfigService, COOKIE_NAMES } from "@app/common";
 import { AuthService } from "@api/modules/auth/services";
 import { LocalAuthGuard, JwtAuthGuard, GoogleAuthGuard } from "@api/modules/auth/guards";
 import { setAuthCookies, clearAuthCookies } from "@api/modules/auth/utils";
@@ -53,7 +53,7 @@ export class AuthController {
     @ApiOperation({ summary: "Refresh access token" })
     @ApiResponse({ status: 200, description: "Tokens refreshed" })
     async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-        const oldRefreshToken = req.cookies?.refresh_token;
+        const oldRefreshToken = req.cookies?.[COOKIE_NAMES.REFRESH_TOKEN];
         if (!oldRefreshToken) {
             throw new UnauthorizedException("No refresh token provided");
         }
@@ -75,7 +75,7 @@ export class AuthController {
     @ApiOperation({ summary: "Logout user and invalidate session" })
     @ApiResponse({ status: 200, description: "Logged out successfully" })
     async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-        const refreshToken = req.cookies?.refresh_token;
+        const refreshToken = req.cookies?.[COOKIE_NAMES.REFRESH_TOKEN];
         if (refreshToken) {
             await this.authService.logout(refreshToken);
         }
