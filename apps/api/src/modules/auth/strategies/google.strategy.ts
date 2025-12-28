@@ -1,27 +1,25 @@
 import { Injectable } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
 import { Strategy, VerifyCallback } from "passport-google-oauth20";
-import { AuthService } from "../services/auth.service";
+import { AppConfigService } from "@app/common";
+import { AuthService } from "@api/modules/auth/services";
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, "google") {
     constructor(
-        private configService: ConfigService,
+        private config: AppConfigService,
         private authService: AuthService
     ) {
-        const clientID = configService.get<string>("GOOGLE_CLIENT_ID");
-        const clientSecret = configService.get<string>("GOOGLE_CLIENT_SECRET");
-        const callbackURL = configService.get<string>("GOOGLE_CALLBACK_URL");
+        const { clientId, clientSecret, callbackUrl, isConfigured } = config.googleOAuthConfig;
 
-        if (!clientID || !clientSecret || !callbackURL) {
+        if (!isConfigured || !clientId || !clientSecret || !callbackUrl) {
             throw new Error("Google OAuth configuration is incomplete");
         }
 
         super({
-            clientID,
-            clientSecret,
-            callbackURL,
+            clientID: clientId,
+            clientSecret: clientSecret,
+            callbackURL: callbackUrl,
             scope: ["email", "profile"],
         });
     }

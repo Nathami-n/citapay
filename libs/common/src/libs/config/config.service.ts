@@ -5,34 +5,200 @@ import { ConfigService } from "@nestjs/config";
 export class AppConfigService {
     constructor(private config: ConfigService) { }
 
-    get(key: string) {
-        return this.config.get(key);
+    // Generic getter for any config value
+    get<T = string>(key: string): T | undefined {
+        return this.config.get<T>(key);
     }
+
+    // ============================================
+    // APP CONFIG
+    // ============================================
+
+    get nodeEnv(): string {
+        return this.config.get<string>("NODE_ENV", "development");
+    }
+
+    get isDevelopment(): boolean {
+        return this.nodeEnv === "development";
+    }
+
+    get isProduction(): boolean {
+        return this.nodeEnv === "production";
+    }
+
+    get port(): number {
+        return this.config.get<number>("PORT", 5002);
+    }
+
+    get appName(): string {
+        return this.config.get<string>("APP_NAME", "CITAPAY API");
+    }
+
+    get logLevel(): string {
+        return this.config.get<string>("LOG_LEVEL", "debug");
+    }
+
+    get frontendUrl(): string {
+        return this.config.get<string>("FRONTEND_URL", "http://localhost:3000");
+    }
+
+    // ============================================
+    // DATABASE
+    // ============================================
+
+    get databaseUrl(): string {
+        return this.config.getOrThrow<string>("DATABASE_URL");
+    }
+
+    // ============================================
+    // JWT CONFIG
+    // ============================================
+
+    get jwtSecret(): string {
+        return this.config.getOrThrow<string>("JWT_SECRET");
+    }
+
+    get jwtExpiration(): string {
+        return this.config.get<string>("JWT_EXPIRATION", "1h");
+    }
+
+    get jwtRefreshExpiration(): string {
+        return this.config.get<string>("JWT_REFRESH_EXPIRATION", "7d");
+    }
+
+    get jwtRefreshExpirationDays(): number {
+        const expiration = this.jwtRefreshExpiration;
+        const match = expiration.match(/^(\d+)d$/);
+        return match ? parseInt(match[1], 10) : 7;
+    }
+
+    // ============================================
+    // GOOGLE OAUTH
+    // ============================================
+
+    get googleClientId(): string | undefined {
+        return this.config.get<string>("GOOGLE_CLIENT_ID");
+    }
+
+    get googleClientSecret(): string | undefined {
+        return this.config.get<string>("GOOGLE_CLIENT_SECRET");
+    }
+
+    get googleCallbackUrl(): string | undefined {
+        return this.config.get<string>("GOOGLE_CALLBACK_URL");
+    }
+
+    get isGoogleOAuthConfigured(): boolean {
+        return !!(this.googleClientId && this.googleClientSecret && this.googleCallbackUrl);
+    }
+
+    // ============================================
+    // MPESA CONFIG
+    // ============================================
+
+    get mpesaConsumerKey(): string {
+        return this.config.getOrThrow<string>("MPESA_CONSUMER_KEY");
+    }
+
+    get mpesaConsumerSecret(): string {
+        return this.config.getOrThrow<string>("MPESA_CONSUMER_SECRET");
+    }
+
+    get mpesaShortCode(): string {
+        return this.config.getOrThrow<string>("MPESA_SHORT_CODE");
+    }
+
+    get mpesaPasskey(): string {
+        return this.config.getOrThrow<string>("MPESA_PASSKEY");
+    }
+
+    get mpesaEnvironment(): "sandbox" | "production" {
+        return this.config.get<"sandbox" | "production">("MPESA_ENVIRONMENT", "sandbox");
+    }
+
+    get mpesaCallbackUrl(): string {
+        return this.config.getOrThrow<string>("MPESA_CALLBACK_URL");
+    }
+
+    get isMpesaSandbox(): boolean {
+        return this.mpesaEnvironment === "sandbox";
+    }
+
+    // ============================================
+    // REDIS
+    // ============================================
+
+    get redisUrl(): string | undefined {
+        return this.config.get<string>("REDIS_URL");
+    }
+
+    // ============================================
+    // THROTTLING
+    // ============================================
+
+    get throttleShortTtl(): number {
+        return this.config.get<number>("THROTTLE_SHORT_TTL", 1000);
+    }
+
+    get throttleShortLimit(): number {
+        return this.config.get<number>("THROTTLE_SHORT_LIMIT", 3);
+    }
+
+    get throttleMediumTtl(): number {
+        return this.config.get<number>("THROTTLE_MEDIUM_TTL", 10000);
+    }
+
+    get throttleMediumLimit(): number {
+        return this.config.get<number>("THROTTLE_MEDIUM_LIMIT", 20);
+    }
+
+    get throttleLongTtl(): number {
+        return this.config.get<number>("THROTTLE_LONG_TTL", 60000);
+    }
+
+    get throttleLongLimit(): number {
+        return this.config.get<number>("THROTTLE_LONG_LIMIT", 100);
+    }
+
+    // ============================================
+    // GROUPED CONFIGS (for convenience)
+    // ============================================
 
     get mpesaConfig() {
         return {
-            consumerKey: this.config.get<string>("MPESA_CONSUMER_KEY"),
-            consumerSecret: this.config.get<string>("MPESA_CONSUMER_SECRET"),
-            shortCode: this.config.get<string>("MPESA_SHORT_CODE"),
-            passKey: this.config.get<string>("MPESA_PASSKEY"),
-            environment: this.config.get<string>("MPESA_ENVIRONMENT"),
+            consumerKey: this.mpesaConsumerKey,
+            consumerSecret: this.mpesaConsumerSecret,
+            shortCode: this.mpesaShortCode,
+            passKey: this.mpesaPasskey,
+            environment: this.mpesaEnvironment,
+            callbackUrl: this.mpesaCallbackUrl,
+            isSandbox: this.isMpesaSandbox,
         };
     }
 
     get jwtConfig() {
         return {
-            secret: this.config.get<string>("JWT_SECRET"),
-            expiration: this.config.get<string>("JWT_EXPIRATION"),
+            secret: this.jwtSecret,
+            expiration: this.jwtExpiration,
+            refreshExpiration: this.jwtRefreshExpiration,
+            refreshExpirationDays: this.jwtRefreshExpirationDays,
         };
     }
 
-    get databaseConfig() {
+    get googleOAuthConfig() {
         return {
-            url: this.config.get<string>("DATABASE_URL"),
+            clientId: this.googleClientId,
+            clientSecret: this.googleClientSecret,
+            callbackUrl: this.googleCallbackUrl,
+            isConfigured: this.isGoogleOAuthConfigured,
         };
     }
 
-    get port() {
-        return this.config.get<number>("PORT");
+    get throttleConfig() {
+        return {
+            short: { ttl: this.throttleShortTtl, limit: this.throttleShortLimit },
+            medium: { ttl: this.throttleMediumTtl, limit: this.throttleMediumLimit },
+            long: { ttl: this.throttleLongTtl, limit: this.throttleLongLimit },
+        };
     }
 }

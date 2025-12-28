@@ -7,7 +7,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 export class PrismaService extends PrismaClient implements OnModuleInit {
   constructor(private readonly config: AppConfigService) {
     const prismaAdapter = new PrismaPg({
-      connectionString: config.databaseConfig.url
+      connectionString: config.databaseUrl
     });
     super({
       adapter: prismaAdapter

@@ -8,18 +8,21 @@ import {
     Body,
     UnauthorizedException,
 } from "@nestjs/common";
-import type { Request, Response } from "express";
-import { AuthService } from "./services/auth.service";
-import { LocalAuthGuard, JwtAuthGuard, GoogleAuthGuard } from "./guards";
-import { setAuthCookies, clearAuthCookies } from "./utils/cookie.util";
-import { EmailSignupDto } from "./dto/email-signup.dto";
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from "@nestjs/swagger";
-import { EmailLoginDto } from "./dto/email-login.dto";
+import type { Request, Response } from "express";
+import { AppConfigService } from "@app/common";
+import { AuthService } from "@api/modules/auth/services";
+import { LocalAuthGuard, JwtAuthGuard, GoogleAuthGuard } from "@api/modules/auth/guards";
+import { setAuthCookies, clearAuthCookies } from "@api/modules/auth/utils";
+import { EmailSignupDto, EmailLoginDto } from "@api/modules/auth/dto";
 
 @ApiTags("Auth")
-@Controller("auth")
+@Controller({ path: "auth", version: "1" })
 export class AuthController {
-    constructor(private authService: AuthService) { }
+    constructor(
+        private authService: AuthService,
+        private config: AppConfigService
+    ) { }
 
     @Post("signup")
     @ApiOperation({ summary: "Register a new user" })
@@ -102,9 +105,8 @@ export class AuthController {
         );
         setAuthCookies(res, accessToken, refreshToken);
 
-        // Redirect to frontend (get URL from config)
-        const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
-        res.redirect(`${frontendUrl}/auth/success`);
+        // Redirect to frontend
+        res.redirect(`${this.config.frontendUrl}/auth/success`);
     }
 
     @UseGuards(JwtAuthGuard)

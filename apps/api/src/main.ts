@@ -1,5 +1,5 @@
 import { AppConfigService, LoggerService } from '@app/common';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
@@ -37,8 +37,12 @@ async function bootstrap() {
     })
   );
 
-  const globalPrefix = "api/v1";
-  app.setGlobalPrefix(globalPrefix);
+  // Set global prefix and enable versioning
+  app.setGlobalPrefix("api");
+  app.enableVersioning({
+    type: VersioningType.URI,
+    defaultVersion: "1",
+  });
 
   const config = new DocumentBuilder()
     .setTitle("Citapay API")
@@ -47,7 +51,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup(`${globalPrefix}/docs`, app, document, {
+  SwaggerModule.setup("api/docs", app, document, {
     swaggerOptions: {
       persistAuthorization: true
     }
@@ -55,7 +59,7 @@ async function bootstrap() {
 
   await app.listen(port);
 
-  logger.log(`API running on: http://localhost:${port}/${globalPrefix}`);
-  logger.log(`Swagger running on: http://localhost:${port}/${globalPrefix}/docs`);
+  logger.log(`API running on: http://localhost:${port}/api/v1`);
+  logger.log(`Swagger running on: http://localhost:${port}/api/docs`);
 }
 bootstrap();

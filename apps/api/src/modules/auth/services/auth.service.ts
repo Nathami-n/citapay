@@ -1,11 +1,10 @@
-import { PrismaService } from "@app/common";
-import { Body, ConflictException, Injectable, UnauthorizedException } from "@nestjs/common";
+import { AppConfigService, PrismaService } from "@app/common";
+import { AuthUserPayload } from "@app/common/types";
+import { ConflictException, Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { ConfigService } from "@nestjs/config";
+import { User, UserRole } from "@prisma/client";
+import { EmailSignupDto } from "@api/modules/auth/dto";
 import * as bcrypt from "bcrypt";
-import { EmailSignupDto } from "../dto/email-signup.dto";
-import { AuthUserPayload } from "@app/common/types/auth.types";
-import { User, Session, UserRole } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
 
 @Injectable()
@@ -13,7 +12,7 @@ export class AuthService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly jwtService: JwtService,
-        private readonly configService: ConfigService
+        private readonly config: AppConfigService
     ) { }
 
     async signup(dto: EmailSignupDto): Promise<User> {
@@ -32,7 +31,7 @@ export class AuthService {
                 email: dto.email,
                 password: hashedPassword,
                 name: dto.name,
-                role: UserRole.USER, // Default role
+                role: UserRole.USER,
             },
         });
     }
@@ -53,7 +52,7 @@ export class AuthService {
         const sessionId = uuidv4();
         const refreshToken = uuidv4();
         const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + 7); // 7 days for refresh token
+        expiresAt.setDate(expiresAt.getDate() + this.config.jwtRefreshExpirationDays);
 
         await this.prisma.session.create({
             data: {
@@ -87,7 +86,7 @@ export class AuthService {
         const newSessionId = uuidv4();
         const newRefreshToken = uuidv4();
         const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + 7);
+        expiresAt.setDate(expiresAt.getDate() + this.config.jwtRefreshExpirationDays);
 
         await this.prisma.$transaction([
             this.prisma.session.update({
@@ -129,8 +128,8 @@ export class AuthService {
 
         return {
             accessToken: this.jwtService.sign(payload, {
-                secret: this.configService.get("JWT_SECRET"),
-                expiresIn: "1h"
+                secret: this.config.jwtSecret,
+                expiresIn: this.config.jwtExpiration as string
             }),
             refreshToken,
         };

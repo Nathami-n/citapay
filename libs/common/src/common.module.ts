@@ -1,4 +1,4 @@
-import { PrismaModule, SharedConfigModule, CacheModule } from '@app/common/libs';
+import { PrismaModule, SharedConfigModule, CacheModule, ThrottlerModule } from '@app/common/libs';
 import { LoggerService } from '@app/common/services';
 import { Global, Module } from '@nestjs/common';
 
@@ -7,7 +7,8 @@ import { Global, Module } from '@nestjs/common';
   imports: [
     SharedConfigModule,
     PrismaModule,
-    CacheModule.forRoot()
+    CacheModule.forRoot(),
+    ThrottlerModule.forRoot(),
   ],
   providers: [
     LoggerService,
@@ -18,7 +19,9 @@ import { Global, Module } from '@nestjs/common';
     // modules
     SharedConfigModule,
     PrismaModule,
-    CacheModule
+    CacheModule,
+    ThrottlerModule,
   ],
 })
 export class CommonModule { }
+
