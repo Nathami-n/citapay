@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Merchant {
+  id           String  @id @default(uuid())
+  email        String  @unique
+  password     String
+  businessName String?
+  balance      Decimal @default(0) @db.Decimal(10, 2)
+
+  apiKeys      ApiKey[]
+  transactions Transaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("merchants")
+}
+
+model ApiKey {
+  id         String    @id @default(uuid())
+  key        String    @unique
+  merchantId String
+  merchant   Merchant  @relation(fields: [merchantId], references: [id])
+  lastUsedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@map("api_keys")
+}
+
+model Transaction {
+  id          String            @id @default(uuid())
+  amount      Decimal           @db.Decimal(10, 2)
+  type        TransactionType
+  status      TransactionStatus @default(PENDING)
+  reference   String            @unique
+  externalRef String? // MPESA Receipt Number
+
+  merchantId String
+  merchant   Merchant @relation(fields: [merchantId], references: [id])
+
+  metadata Json? // Store full MPESA callback payload
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("transactions")
+}
+
+enum TransactionType {
+  PAYIN
+  PAYOUT
+  COMMISSION
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}

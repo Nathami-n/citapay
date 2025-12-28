@@ -1,0 +1,17 @@
+
+services:
+  postgres_new:
+    image: postgres:latest
+    container_name: citapay
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5437:5432" # host port 5437 -> container 5432
+    volumes:
+      - postgres_new_data:/var/lib/postgresql/data
+    restart: always
+
+volumes:
+  postgres_new_data:
