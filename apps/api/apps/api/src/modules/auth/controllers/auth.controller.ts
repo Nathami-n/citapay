@@ -1,13 +1,20 @@
 import {
-    AuthService,
-    clearAuthCookies,
     EmailLoginDto,
-    EmailSignupDto,
+    EmailSignupDto
+} from "@api/modules/auth/dto";
+import {
+    AuthService,
+} from "@api/modules/auth/services";
+import {
+    clearAuthCookies,
+    setAuthCookies
+} from "@api/modules/auth/utils";
+
+import {
     GoogleAuthGuard,
     JwtAuthGuard,
-    LocalAuthGuard,
-    setAuthCookies
-} from "@api/modules/auth";
+    LocalAuthGuard
+} from "@api/modules/auth/guards";
 import {
     AppConfigService,
     COOKIE_NAMES

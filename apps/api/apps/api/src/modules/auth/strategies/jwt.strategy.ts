@@ -1,9 +1,9 @@
+import { AppConfigService, AUTH_STRATEGIES, COOKIE_NAMES, PrismaService } from "@app/common";
+import { AuthUserPayload } from "@app/common/types";
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { Request } from "express";
 import { ExtractJwt, Strategy } from "passport-jwt";
-import { AppConfigService, AUTH_STRATEGIES, COOKIE_NAMES, PrismaService } from "@app/common";
-import { AuthUserPayload } from "@app/common/types";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, AUTH_STRATEGIES.JWT) {
