@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/citapay/src",
+  "compilerOptions": {
+    "deleteOutDir": true,
+    "webpack": true,
+    "tsConfigPath": "apps/citapay/tsconfig.app.json"
+  },
+  "monorepo": true,
+  "root": "apps/citapay",
+  "projects": {
+    "api": {
+      "type": "application",
+      "root": "apps/api",
+      "entryFile": "main",
+      "sourceRoot": "apps/api/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/api/tsconfig.app.json"
+      }
+    },
+    "citapay": {
+      "type": "application",
+      "root": "apps/citapay",
+      "entryFile": "main",
+      "sourceRoot": "apps/citapay/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/citapay/tsconfig.app.json"
+      }
+    }
+  }
+}
