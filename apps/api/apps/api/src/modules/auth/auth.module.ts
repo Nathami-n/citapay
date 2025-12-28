@@ -1,11 +1,11 @@
+import { AuthController } from "@api/modules/auth/controllers";
+import { RolesGuard } from "@api/modules/auth/guards";
+import { AuthService } from "@api/modules/auth/services";
+import { GoogleStrategy, JwtStrategy, LocalStrategy } from "@api/modules/auth/strategies";
+import { AppConfigService } from "@app/common";
 import { Module } from "@nestjs/common";
 import { JwtModule, JwtSignOptions } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
-import { AppConfigService } from "@app/common";
-import { AuthService } from "apps/api/src/modules/auth/services";
-import { AuthController } from "apps/api/src/modules/auth/controllers";
-import { LocalStrategy, JwtStrategy, GoogleStrategy } from "apps/api/src/modules/auth/strategies";
-import { RolesGuard } from "apps/api/src/modules/auth/guards";
 
 @Module({
     imports: [

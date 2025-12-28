@@ -1,20 +1,38 @@
 import {
+    AuthService,
+    clearAuthCookies,
+    EmailLoginDto,
+    EmailSignupDto,
+    GoogleAuthGuard,
+    JwtAuthGuard,
+    LocalAuthGuard,
+    setAuthCookies
+} from "@api/modules";
+import {
+    AppConfigService,
+    COOKIE_NAMES
+} from "@app/common";
+import {
+    Body,
     Controller,
+    Get,
     Post,
-    UseGuards,
     Req,
     Res,
-    Get,
-    Body,
     UnauthorizedException,
+    UseGuards,
 } from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiResponse, ApiBody } from "@nestjs/swagger";
-import type { Request, Response } from "express";
-import { AppConfigService, COOKIE_NAMES } from "@app/common";
-import { AuthService } from "apps/api/src/modules/auth/services";
-import { LocalAuthGuard, JwtAuthGuard, GoogleAuthGuard } from "apps/api/src/modules/auth/guards";
-import { setAuthCookies, clearAuthCookies } from "apps/api/src/modules/auth/utils";
-import { EmailSignupDto, EmailLoginDto } from "apps/api/src/modules/auth/dto";
+import {
+    ApiBody,
+    ApiOperation,
+    ApiResponse,
+    ApiTags
+} from "@nestjs/swagger";
+import type {
+    Request,
+    Response
+} from "express";
+
 
 @ApiTags("Auth")
 @Controller({ path: "auth", version: "1" })
