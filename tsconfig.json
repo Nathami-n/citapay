@@ -21,6 +21,13 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
-    "paths": {}
+    "paths": {
+      "@app/sdk": [
+        "libs/sdk/src"
+      ],
+      "@app/sdk/*": [
+        "libs/sdk/src/*"
+      ]
+    }
   }
 }
