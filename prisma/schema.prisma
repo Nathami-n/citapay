@@ -7,30 +7,31 @@ datasource db {
 }
 
 model User {
-  id       String        @id @default(uuid())
-  email    String?       @unique
-  name     String?
-  password String?       // only for email/password auth
-  sessions Session[]
+  id            String         @id @default(uuid())
+  email         String?        @unique
+  name          String?
+  password      String? // only for email/password auth
+  role          UserRole       @default(USER)
+  sessions      Session[]
   authProviders AuthProvider[]
-  merchant Merchant?     // link if user is a merchant
+  merchant      Merchant? // link if user is a merchant
 
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Merchant {
-  id           String      @id @default(uuid())
-  userId       String      @unique
-  user         User        @relation(fields: [userId], references: [id])
+  id           String  @id @default(uuid())
+  userId       String  @unique
+  user         User    @relation(fields: [userId], references: [id])
   businessName String?
-  balance      Decimal     @default(0) @db.Decimal(10, 2)
+  balance      Decimal @default(0) @db.Decimal(10, 2)
 
   apiKeys      ApiKey[]
   transactions Transaction[]
 
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("merchants")
 }
@@ -38,7 +39,7 @@ model Merchant {
 model AuthProvider {
   id         String           @id @default(uuid())
   type       AuthProviderType
-  providerId String           // e.g. Google/Facebook user ID
+  providerId String // e.g. Google/Facebook user ID
   userId     String
   user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt  DateTime         @default(now())
@@ -47,26 +48,28 @@ model AuthProvider {
 }
 
 model Session {
-  id        String   @id @default(uuid())
-  token     String
-  ipAddress String?
-  userAgent String?
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  expiresAt DateTime
-  meta      Json?
+  id           String   @id @default(uuid())
+  refreshToken String   @unique
+  ipAddress    String?
+  userAgent    String?
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt    DateTime
+  isRevoked    Boolean  @default(false)
+  replacedBy   String? // ID of the new session that replaced this one
+  meta         Json?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([token])
+  @@index([userId])
 }
 
 model ApiKey {
-  id         String   @id @default(uuid())
-  key        String   @unique
+  id         String    @id @default(uuid())
+  key        String    @unique
   merchantId String
-  merchant   Merchant @relation(fields: [merchantId], references: [id])
+  merchant   Merchant  @relation(fields: [merchantId], references: [id])
   lastUsedAt DateTime?
 
   createdAt DateTime @default(now())
@@ -79,12 +82,12 @@ model Transaction {
   type        TransactionType
   status      TransactionStatus @default(PENDING)
   reference   String            @unique
-  externalRef String?           // MPESA receipt number
+  externalRef String? // MPESA receipt number
 
   merchantId String
   merchant   Merchant @relation(fields: [merchantId], references: [id])
 
-  metadata Json?                // Full MPESA callback payload
+  metadata Json? // Full MPESA callback payload
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -108,4 +111,10 @@ enum AuthProviderType {
   EMAIL
   GOOGLE
   FACEBOOK
+}
+
+enum UserRole {
+  ADMIN
+  MERCHANT
+  USER
 }
