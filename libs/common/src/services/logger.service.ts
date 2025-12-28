@@ -1,34 +1,94 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable, LoggerService as NestLoggerService } from '@nestjs/common';
+import * as winston from 'winston';
 
+export enum LogLevel {
+  ERROR = 'error',
+  WARN = 'warn',
+  INFO = 'info',
+  DEBUG = 'debug',
+  VERBOSE = 'verbose',
+}
 
 @Injectable()
-export class LoggerService {
+export class LoggerService implements NestLoggerService {
+  private logger: winston.Logger;
+  private context?: string;
 
-    private readonly logger = new Logger("CITAPAY");
+  constructor() {
+    this.logger = winston.createLogger({
+      level: process.env.LOG_LEVEL || 'info',
+      format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.errors({ stack: true }),
+        winston.format.splat(),
+        winston.format.json(),
+      ),
+      defaultMeta: { service: 'pagamio-api' },
+      transports: [
+        new winston.transports.Console({
+          format: winston.format.combine(
+            winston.format.colorize(),
+            winston.format.printf((info) => {
+              const { timestamp, level, message, context, ...meta } = info;
+              const ctx =
+                typeof context === 'string'
+                  ? context
+                  : typeof context === 'object' && context !== null
+                    ? JSON.stringify(context)
+                    : String(this.context ?? 'Application');
+              const ts = String(timestamp);
+              const lvl = String(level);
+              const msg = String(message);
+              const metaStr = Object.keys(meta).length
+                ? JSON.stringify(meta)
+                : '';
+              return `[${ts}] [${lvl}] [${ctx}] ${msg} ${metaStr}`;
+            }),
+          ),
+        }),
+      ],
+    });
 
-    constructor(private context?: string) { }
-
-    log(message: string, context?: string) {
-        this.logger.log(message, context || this.context);
+    // Add file transport in production
+    if (process.env.NODE_ENV === 'production') {
+      this.logger.add(
+        new winston.transports.File({
+          filename: 'logs/error.log',
+          level: 'error',
+        }),
+      );
+      this.logger.add(
+        new winston.transports.File({
+          filename: 'logs/combined.log',
+        }),
+      );
     }
+  }
 
-    error(message: string, trace?: string, context?: string) {
-        this.logger.error(message, trace, context || this.context);
-    }
+  setContext(context: string): void {
+    this.context = context;
+  }
 
-    warn(message: string, context?: string) {
-        this.logger.warn(message, context || this.context);
-    }
+  log(message: string, context?: string): void {
+    this.logger.info(message, { context: context || this.context });
+  }
 
-    debug(message: string, context?: string) {
-        this.logger.debug(message, context || this.context);
-    }
+  error(message: string, trace?: string, context?: string): void {
+    this.logger.error(message, {
+      context: context || this.context,
+      trace,
+    });
+  }
 
-    verbose(message: string, context?: string) {
-        this.logger.verbose(message, context || this.context);
-    }
+  warn(message: string, context?: string): void {
+    this.logger.warn(message, { context: context || this.context });
+  }
 
-    setContext(context: string) {
-        this.context = context;
-    }
+  debug(message: string, context?: string): void {
+    this.logger.debug(message, { context: context || this.context });
+  }
+
+  verbose(message: string, context?: string): void {
+    this.logger.verbose(message, { context: context || this.context });
+  }
 }
