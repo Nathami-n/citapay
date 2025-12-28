@@ -11,10 +11,10 @@ import {
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from "@nestjs/swagger";
 import type { Request, Response } from "express";
 import { AppConfigService, COOKIE_NAMES } from "@app/common";
-import { AuthService } from "@api/modules/auth/services";
-import { LocalAuthGuard, JwtAuthGuard, GoogleAuthGuard } from "@api/modules/auth/guards";
-import { setAuthCookies, clearAuthCookies } from "@api/modules/auth/utils";
-import { EmailSignupDto, EmailLoginDto } from "@api/modules/auth/dto";
+import { AuthService } from "apps/api/src/modules/auth/services";
+import { LocalAuthGuard, JwtAuthGuard, GoogleAuthGuard } from "apps/api/src/modules/auth/guards";
+import { setAuthCookies, clearAuthCookies } from "apps/api/src/modules/auth/utils";
+import { EmailSignupDto, EmailLoginDto } from "apps/api/src/modules/auth/dto";
 
 @ApiTags("Auth")
 @Controller({ path: "auth", version: "1" })

@@ -3,7 +3,7 @@ import { AuthUserPayload } from "@app/common/types";
 import { ConflictException, Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { AuthProviderType, User, UserRole } from "@prisma/client";
-import { EmailSignupDto } from "@api/modules/auth/dto";
+import { EmailSignupDto } from "apps/api/src/modules/auth/dto";
 import * as bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 

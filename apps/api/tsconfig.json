@@ -1,0 +1,12 @@
+{
+  "extends": "@repo/typescript-config/nestjs.json",
+  "compilerOptions": {
+    "paths": {
+      "@api/*": ["apps/api/src/*"],
+      "@app/common": ["libs/common/src"],
+      "@app/common/*": ["libs/common/src/*"],
+      "@app/sdk": ["libs/sdk/src"],
+      "@app/sdk/*": ["libs/sdk/src/*"]
+    }
+  }
+}

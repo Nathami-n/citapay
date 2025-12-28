@@ -1,7 +1,7 @@
 import {
   AuthModule,
   MerchantsModule
-} from '@api/modules';
+} from 'apps/api/src/modules';
 import { CommonModule } from '@app/common';
 import { Module } from '@nestjs/common';
 import { ApiController } from './api.controller';
